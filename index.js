@@ -21,7 +21,7 @@ app.use(express.json()); // Parse JSON bodies
 
 // Enable CORS
 app.use(cors({
-  origin: ['http://localhost:3000', 'http://localhost:5173', 'http://localhost:3001'], // Allow frontend
+  origin: ['https://blog-backend-q1ap.onrender.com', 'http://localhost:3000', 'http://localhost:5173', 'http://localhost:3001'], // Allow frontend
   credentials: true, // Allow cookies and authentication headers
   methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allow these methods
 }));
