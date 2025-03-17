@@ -20,10 +20,13 @@ const PORT = process.env.PORT || 3000; // Set the port to the environment variab
 app.use(express.json()); // Parse JSON bodies
 
 // Enable CORS
+import cors from 'cors';
+
 app.use(cors({
-  origin: ['https://blog-backend-q1ap.onrender.com', 'http://localhost:3000', 'http://localhost:5173', 'http://localhost:3001'], // Allow frontend
-  credentials: true, // Allow cookies and authentication headers
-  methods: ['GET', 'POST', 'PUT', 'DELETE'], // Allow these methods
+  origin: ['https://blog-backend-q1ap.onrender.com'], // ✅ Remove localhost
+  credentials: true, 
+  methods: ['GET', 'POST', 'PUT', 'DELETE'], 
+  allowedHeaders: ['Content-Type', 'Authorization'], // ✅ Explicitly allow Authorization header
 }));
 
 // Unified error handler middleware
