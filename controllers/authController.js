@@ -38,7 +38,7 @@ const getAllUsers = async (req, res) => {
 // Register a new user
 const register = async (req, res) => {
   try {
-    console.log("Received Registration Data:", req.body); // Log incoming request
+    console.log("Received request:", req.body);
 
     const { username, email, password } = req.body;
 
@@ -46,42 +46,36 @@ const register = async (req, res) => {
       return res.status(400).json({ error: "All fields are required" });
     }
 
-    // Check if email is valid
+    // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       return res.status(400).json({ error: "Invalid email format" });
     }
 
-    // Check if password is strong (at least 6 characters)
+    // Ensure password is at least 6 characters
     if (password.length < 6) {
       return res.status(400).json({ error: "Password must be at least 6 characters long" });
     }
 
-    // Check if user already exists
-    console.log(`Checking if email ${email} exists in database...`);
+    console.log("Checking if user exists...");
     const existingUser = await prisma.user.findUnique({ where: { email } });
-
     if (existingUser) {
       return res.status(400).json({ error: "User with this email already exists" });
     }
 
-    // Hash password
     console.log("Hashing password...");
     const hashedPassword = await bcrypt.hash(password, 10);
+    if (!hashedPassword) {
+      return res.status(500).json({ error: "Password hashing failed" });
+    }
 
-    // Create user
-    console.log("Creating new user in database...");
+    console.log("Creating new user...");
     const user = await prisma.user.create({
-      data: {
-        username,
-        email,
-        password: hashedPassword,
-      },
+      data: { username, email, password: hashedPassword },
     });
 
-    console.log("User created successfully:", user);
+    console.log("User registered successfully:", user);
 
-    // Respond with success (excluding password)
     return res.status(201).json({
       id: user.id,
       username: user.username,
@@ -89,8 +83,10 @@ const register = async (req, res) => {
       message: "User registered successfully",
     });
   } catch (error) {
-    console.error("Error registering user:", error); // Log actual error
-    return res.status(500).json({ error: "Failed to register user", details: error.message });
+    console.error("Registration Error:", error);
+
+    // Return only the actual error message
+    return res.status(500).json({ error: error.message });
   }
 };
 
