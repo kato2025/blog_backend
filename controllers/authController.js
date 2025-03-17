@@ -37,21 +37,40 @@ const getAllUsers = async (req, res) => {
 
 // Register a new user
 const register = async (req, res) => {
-  const { username, email, password } = req.body;
-
-  if (!username || !email || !password) {
-    return res.status(400).json({ error: 'All fields are required' });
-  }
-
   try {
-    // Check if the email already exists
-    const existingUser = await prisma.user.findUnique({ where: { email } });
-    if (existingUser) return res.status(400).json({ error: 'User with this email already exists' });
+    console.log("Received Registration Data:", req.body); // Log incoming request
 
-    // Hash the password
+    const { username, email, password } = req.body;
+
+    if (!username || !email || !password) {
+      return res.status(400).json({ error: "All fields are required" });
+    }
+
+    // Check if email is valid
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ error: "Invalid email format" });
+    }
+
+    // Check if password is strong (at least 6 characters)
+    if (password.length < 6) {
+      return res.status(400).json({ error: "Password must be at least 6 characters long" });
+    }
+
+    // Check if user already exists
+    console.log(`Checking if email ${email} exists in database...`);
+    const existingUser = await prisma.user.findUnique({ where: { email } });
+
+    if (existingUser) {
+      return res.status(400).json({ error: "User with this email already exists" });
+    }
+
+    // Hash password
+    console.log("Hashing password...");
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create the user
+    // Create user
+    console.log("Creating new user in database...");
     const user = await prisma.user.create({
       data: {
         username,
@@ -60,14 +79,18 @@ const register = async (req, res) => {
       },
     });
 
-    // Respond with user details (excluding password)
-    res.status(201).json({
+    console.log("User created successfully:", user);
+
+    // Respond with success (excluding password)
+    return res.status(201).json({
       id: user.id,
       username: user.username,
       email: user.email,
+      message: "User registered successfully",
     });
   } catch (error) {
-    res.status(500).json({ error: 'Failed to register user', details: error.message });
+    console.error("Error registering user:", error); // Log actual error
+    return res.status(500).json({ error: "Failed to register user", details: error.message });
   }
 };
 
