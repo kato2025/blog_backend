@@ -19,9 +19,6 @@ const PORT = process.env.PORT || 3000; // Set the port to the environment variab
 // Middleware to parse JSON bodies
 app.use(express.json()); // Parse JSON bodies
 
-// Enable CORS
-import cors from 'cors';
-
 app.use(cors({
   origin: ['https://blog-backend-q1ap.onrender.com'], // ✅ Remove localhost
   credentials: true, 
